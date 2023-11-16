@@ -48,6 +48,11 @@ matrix *make_matrix(int rows, int cols)
   for (int i = 0; i < rows; i++)
   {
     new_matrix->values[i] = (int *)malloc(sizeof(int) * cols);
+
+    for (int j = 0; j < cols; j++)
+    {
+      new_matrix->values[i][j] = 0;
+    }
   }
 
   return new_matrix;

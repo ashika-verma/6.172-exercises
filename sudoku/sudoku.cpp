@@ -6,6 +6,8 @@ using namespace std;
 
 constexpr int size = 9;
 
+constexpr int lookupTable[size] = {0, 0, 0, 3, 3, 3, 6, 6, 6};
+
 int sudoku_board[size][size] = {
     {5, 3, 0, 0, 7, 0, 0, 0, 0},
     {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -29,24 +31,34 @@ void printSudokuBoard()
     }
 }
 
-// take a pointer to the puzzle, & x
+constexpr int empty_size = size * size * 2;
+struct boardDesc
+{
+    int doubledSize;
+    int emptyBoxes[empty_size];
+};
 
-vector<vector<int>> getEmptyBoxes(const int (&puzzle)[size][size])
+boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
 {
     vector<vector<int>> empty_boxes;
+    struct boardDesc board;
+    empty_boxes.reserve(size * size * 2);
+    int counter = 0;
     for (int i = 0; i < size; i++)
     {
-
         for (int j = 0; j < size; j++)
         {
             if (puzzle[i][j] == 0)
             {
+                board.emptyBoxes[counter] = i;
+                board.emptyBoxes[counter + 1] = j;
+                counter += 2;
                 empty_boxes.push_back({i, j});
             }
         }
     }
-
-    return empty_boxes;
+    board.doubledSize = counter;
+    return board;
 }
 
 bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> &location)
@@ -65,12 +77,12 @@ bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> 
         invalid_nums.set(col_num);
     }
 
-    int box_r = row / 3;
-    int box_c = col / 3;
+    int box_r = lookupTable[row];
+    int box_c = lookupTable[col];
 
-    for (int r = box_r * 3; r < 3 * box_r + 3; r++)
+    for (int r = box_r; r < box_r + 3; r++)
     {
-        for (int c = box_c * 3; c < 3 * box_c + 3; c++)
+        for (int c = box_c; c < box_c + 3; c++)
         {
             invalid_nums.set(puzzle[r][c]);
         }
@@ -78,19 +90,19 @@ bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> 
     return invalid_nums.flip();
 }
 
-bool solve_board(int (&puzzle)[size][size], const vector<vector<int>> &locations, const int curr_loc)
+bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc)
 {
 
-    if (locations.size() == curr_loc)
+    if (board.doubledSize == curr_loc)
     {
         return true;
     }
 
-    const vector<int> location = locations[curr_loc];
-    int r = location[0];
-    int c = location[1];
+    int r = board.emptyBoxes[curr_loc];
+    int c = board.emptyBoxes[curr_loc + 1];
 
-    bitset<10> valid_nums = get_valid_numbers(puzzle, location);
+    bitset<10>
+        valid_nums = get_valid_numbers(puzzle, {r, c});
 
     for (int i = 1; i < 10; i++)
     {
@@ -98,7 +110,7 @@ bool solve_board(int (&puzzle)[size][size], const vector<vector<int>> &locations
         if (valid_nums[i])
         {
             puzzle[r][c] = i;
-            if (solve_board(puzzle, locations, curr_loc + 1))
+            if (solve_board(puzzle, board, curr_loc + 2))
             {
                 return true;
             }
@@ -115,8 +127,8 @@ int main()
     printSudokuBoard();
 
     auto start = chrono::high_resolution_clock::now();
-    vector<vector<int>> empty_boxes = getEmptyBoxes(sudoku_board);
-    solve_board(sudoku_board, empty_boxes, 0);
+    boardDesc board = getEmptyBoxes(sudoku_board);
+    solve_board(sudoku_board, board, 0);
     auto end = chrono::high_resolution_clock::now();
 
     std::cout
@@ -124,7 +136,7 @@ int main()
     printSudokuBoard();
 
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start).count();
-    cout << "Time taken:  " << duration << "micros" << endl;
+    cout << "Time taken:  " << duration / 1000.0 << "ms" << endl;
 
     return 0;
 }

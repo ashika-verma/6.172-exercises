@@ -75,43 +75,37 @@ bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> 
             invalid_nums.set(puzzle[r][c]);
         }
     }
-    return invalid_nums;
+    return invalid_nums.flip();
 }
 
-bool solve_board(int (&puzzle)[size][size], vector<vector<int>> &locations)
+bool solve_board(int (&puzzle)[size][size], const vector<vector<int>> &locations, const int curr_loc)
 {
 
-    if (locations.size() == 0)
+    if (locations.size() == curr_loc)
     {
         return true;
     }
 
-    const vector<int> location = locations[0];
+    const vector<int> location = locations[curr_loc];
     int r = location[0];
     int c = location[1];
 
     bitset<10> valid_nums = get_valid_numbers(puzzle, location);
-    if (valid_nums.size() == 0)
-    {
-        return false;
-    }
-
-    vector<vector<int>> rest(locations.begin() + 1, locations.end());
 
     for (int i = 1; i < 10; i++)
     {
 
-        if (!valid_nums[i])
+        if (valid_nums[i])
         {
             puzzle[r][c] = i;
-            if (solve_board(puzzle, rest))
+            if (solve_board(puzzle, locations, curr_loc + 1))
             {
                 return true;
             }
-            puzzle[r][c] = 0;
         }
     }
 
+    puzzle[r][c] = 0;
     return false;
 }
 
@@ -122,15 +116,15 @@ int main()
 
     auto start = chrono::high_resolution_clock::now();
     vector<vector<int>> empty_boxes = getEmptyBoxes(sudoku_board);
-    solve_board(sudoku_board, empty_boxes);
+    solve_board(sudoku_board, empty_boxes, 0);
     auto end = chrono::high_resolution_clock::now();
 
     std::cout
         << "\nSolved Sudoku Board:\n";
     printSudokuBoard();
 
-    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
-    cout << "Time taken:  " << duration << "ms" << endl;
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start).count();
+    cout << "Time taken:  " << duration << "micros" << endl;
 
     return 0;
 }

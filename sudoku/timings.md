@@ -6,3 +6,4 @@
 - pass locations as ref (&locations) - 59ms
 - pass index of locations instead of making new locations vector each time- 2.237ms
 - represent empty boxes with array - 1.93ms
+- remove vector for {r, c} location - 0.915

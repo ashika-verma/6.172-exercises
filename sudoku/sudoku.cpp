@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <chrono>
 #include <bitset>
 using namespace std;
@@ -40,9 +39,7 @@ struct boardDesc
 
 boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
 {
-    vector<vector<int>> empty_boxes;
     struct boardDesc board;
-    empty_boxes.reserve(size * size * 2);
     int counter = 0;
     for (int i = 0; i < size; i++)
     {
@@ -53,7 +50,6 @@ boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
                 board.emptyBoxes[counter] = i;
                 board.emptyBoxes[counter + 1] = j;
                 counter += 2;
-                empty_boxes.push_back({i, j});
             }
         }
     }
@@ -61,7 +57,7 @@ boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
     return board;
 }
 
-bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> &location)
+bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const int (&location)[2])
 {
     int row = location[0];
     int col = location[1];

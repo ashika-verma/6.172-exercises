@@ -31,7 +31,7 @@ void printSudokuBoard()
 
 // take a pointer to the puzzle, & x
 
-vector<vector<int>> getEmptyBoxes(int puzzle[size][size])
+vector<vector<int>> getEmptyBoxes(const int (&puzzle)[size][size])
 {
     vector<vector<int>> empty_boxes;
     for (int i = 0; i < size; i++)
@@ -49,7 +49,7 @@ vector<vector<int>> getEmptyBoxes(int puzzle[size][size])
     return empty_boxes;
 }
 
-bitset<10> get_valid_numbers(const int puzzle[size][size], const vector<int> &location)
+bitset<10> get_valid_numbers(const int (&puzzle)[size][size], const vector<int> &location)
 {
     int row = location[0];
     int col = location[1];
@@ -78,7 +78,7 @@ bitset<10> get_valid_numbers(const int puzzle[size][size], const vector<int> &lo
     return invalid_nums;
 }
 
-bool solve_board(int puzzle[size][size], vector<vector<int>> locations)
+bool solve_board(int (&puzzle)[size][size], vector<vector<int>> &locations)
 {
 
     if (locations.size() == 0)

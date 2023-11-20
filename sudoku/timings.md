@@ -8,3 +8,4 @@
 - represent empty boxes with array - 1.93ms
 - remove vector for {r, c} location - 0.915ms
 - inlining functions - 0.793ms
+- replace bitset with bit array - .747

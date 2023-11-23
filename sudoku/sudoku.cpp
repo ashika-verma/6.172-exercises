@@ -69,24 +69,15 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
     int r = board.emptyBoxes[curr_loc];
     int c = board.emptyBoxes[curr_loc + 1];
 
-    bool valid_num[10] = {
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true};
+    int valid = 0b1111111111;
     // try the col
     for (int x = 0; x < size; x++)
     {
         int row_num = puzzle[x][c];
         int col_num = puzzle[r][x];
-        valid_num[row_num] = false;
-        valid_num[col_num] = false;
+        // "clear bit"
+        valid = valid & ~(1 << row_num);
+        valid = valid & ~(1 << col_num);
     }
 
     int box_r = lookupTable[r];
@@ -97,13 +88,14 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
         for (int box_it_c = box_c; box_it_c < box_c + 3; box_it_c++)
         {
             int box_num = puzzle[box_it_r][box_it_c];
-            valid_num[box_num] = false;
+            valid = valid & ~(1 << box_num);
         }
     }
 
     for (int i = 1; i < 10; i++)
     {
-        if (valid_num[i])
+        int bitAtI = (valid & (1 << i)) >> i;
+        if (bitAtI)
         {
             puzzle[r][c] = i;
             // essentially, this passes the board along, with [r][c] set &

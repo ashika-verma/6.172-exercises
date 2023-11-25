@@ -31,7 +31,7 @@ void printSudokuBoard()
     }
 }
 
-constexpr int empty_size = size * size * 2;
+constexpr int empty_size = size * size;
 struct boardDesc
 {
     int boardSize;              // tells you when we get to the end of empty boxes
@@ -57,16 +57,16 @@ boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
     return board;
 }
 
-bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc)
+bool solve_board(int (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const int curr_loc)
 {
 
-    if (board.boardSize == curr_loc)
+    if (curr_loc == -1)
     {
         return true;
     }
 
-    int r = board.emptyBoxes[curr_loc] >> 4;
-    int c = board.emptyBoxes[curr_loc] & 0b00001111;
+    int r = emptyBoxes[curr_loc] >> 4;
+    int c = emptyBoxes[curr_loc] & 0b00001111;
 
     int valid = 0b1111111111;
     // try the col
@@ -100,7 +100,7 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
         {
             puzzle[r][c] = i;
             // essentially, this passes the board along, with [r][c] set &
-            if (solve_board(puzzle, board, curr_loc + 1))
+            if (solve_board(puzzle, emptyBoxes, curr_loc - 1))
             {
                 return true;
             }
@@ -119,7 +119,7 @@ int main()
     auto start = chrono::high_resolution_clock::now();
     boardDesc board = getEmptyBoxes(sudoku_board);
     // solve_board(sudoku_board, board, 0);
-    solve_board(sudoku_board, board, 0);
+    solve_board(sudoku_board, board.emptyBoxes, board.boardSize - 1);
     auto end = chrono::high_resolution_clock::now();
 
     std::cout

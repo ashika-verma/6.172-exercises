@@ -8,6 +8,8 @@ constexpr int size = 9;
 
 constexpr int lookupTable[size] = {0, 0, 0, 3, 3, 3, 6, 6, 6};
 
+constexpr int rowCheck[9][2] = {{1, 2}, {0, 2}, {0, 1}, {4, 5}, {3, 5}, {3, 4}, {7, 8}, {6, 8}, {6, 7}};
+
 int sudoku_board[size][size] = {
     {5, 3, 0, 0, 7, 0, 0, 0, 0},
     {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -80,17 +82,19 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
         valid = valid & ~(1 << col_num);
     }
 
-    int box_r = lookupTable[r];
-    int box_c = lookupTable[c];
+    int first_r = rowCheck[r][0];
+    int second_r = rowCheck[r][1];
+    int first_c = rowCheck[c][0];
+    int second_c = rowCheck[c][1];
 
-    for (int box_it_r = box_r; box_it_r < box_r + 3; box_it_r++)
-    {
-        for (int box_it_c = box_c; box_it_c < box_c + 3; box_it_c++)
-        {
-            int box_num = puzzle[box_it_r][box_it_c];
-            valid = valid & ~(1 << box_num);
-        }
-    }
+    int box_num = puzzle[first_r][first_c];
+    valid = valid & ~(1 << box_num);
+    box_num = puzzle[second_r][first_c];
+    valid = valid & ~(1 << box_num);
+    box_num = puzzle[first_r][second_c];
+    valid = valid & ~(1 << box_num);
+    box_num = puzzle[second_r][second_c];
+    valid = valid & ~(1 << box_num);
 
     for (int i = 1; i < 10; i++)
     {

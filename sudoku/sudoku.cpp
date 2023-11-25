@@ -6,9 +6,7 @@ using namespace std;
 
 constexpr int size = 9;
 
-constexpr int lookupTable[size] = {0, 0, 0, 3, 3, 3, 6, 6, 6};
-
-constexpr int rowCheck[9][2] = {{1, 2}, {0, 2}, {0, 1}, {4, 5}, {3, 5}, {3, 4}, {7, 8}, {6, 8}, {6, 7}};
+constexpr int rowCheck[size * 2] = {1, 2, 0, 2, 0, 1, 4, 5, 3, 5, 3, 4, 7, 8, 6, 8, 6, 7};
 
 int sudoku_board[size][size] = {
     {5, 3, 0, 0, 7, 0, 0, 0, 0},
@@ -36,8 +34,8 @@ void printSudokuBoard()
 constexpr int empty_size = size * size * 2;
 struct boardDesc
 {
-    int doubledSize;            // tells you when we get to the end of empty boxes
-    int emptyBoxes[empty_size]; // interleaved [r_1, c_1, r_2, c_2]
+    int boardSize;              // tells you when we get to the end of empty boxes
+    int emptyBoxes[empty_size]; // encoded [r_1|c_1, r_2|c_2]
 };
 
 boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
@@ -50,26 +48,25 @@ boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
         {
             if (puzzle[i][j] == 0)
             {
-                board.emptyBoxes[counter] = i;
-                board.emptyBoxes[counter + 1] = j;
-                counter += 2;
+                board.emptyBoxes[counter] = i << 4 | j;
+                counter += 1;
             }
         }
     }
-    board.doubledSize = counter;
+    board.boardSize = counter;
     return board;
 }
 
 bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc)
 {
 
-    if (board.doubledSize == curr_loc)
+    if (board.boardSize == curr_loc)
     {
         return true;
     }
 
-    int r = board.emptyBoxes[curr_loc];
-    int c = board.emptyBoxes[curr_loc + 1];
+    int r = board.emptyBoxes[curr_loc] >> 4;
+    int c = board.emptyBoxes[curr_loc] & 0b00001111;
 
     int valid = 0b1111111111;
     // try the col
@@ -82,19 +79,19 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
         valid = valid & ~(1 << col_num);
     }
 
-    int first_r = rowCheck[r][0];
-    int second_r = rowCheck[r][1];
-    int first_c = rowCheck[c][0];
-    int second_c = rowCheck[c][1];
+    int first_r = rowCheck[2 * r];
+    int second_r = rowCheck[2 * r + 1];
+    int first_c = rowCheck[2 * c];
+    int second_c = rowCheck[2 * c + 1];
 
     int box_num = puzzle[first_r][first_c];
-    valid = valid & ~(1 << box_num);
+    valid &= ~(1 << box_num);
     box_num = puzzle[second_r][first_c];
-    valid = valid & ~(1 << box_num);
+    valid &= ~(1 << box_num);
     box_num = puzzle[first_r][second_c];
-    valid = valid & ~(1 << box_num);
+    valid &= ~(1 << box_num);
     box_num = puzzle[second_r][second_c];
-    valid = valid & ~(1 << box_num);
+    valid &= ~(1 << box_num);
 
     for (int i = 1; i < 10; i++)
     {
@@ -103,7 +100,7 @@ bool solve_board(int (&puzzle)[size][size], boardDesc &board, const int curr_loc
         {
             puzzle[r][c] = i;
             // essentially, this passes the board along, with [r][c] set &
-            if (solve_board(puzzle, board, curr_loc + 2))
+            if (solve_board(puzzle, board, curr_loc + 1))
             {
                 return true;
             }

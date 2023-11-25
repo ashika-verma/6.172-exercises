@@ -11,3 +11,4 @@
 - replace bitset with bit array - .747ms
 - replace bit array with an int & used actual bits - .531ms
 - use lookup table for box indices - .436ms
+- encode rowCheck as int[] instead of int[][], encode empty boxes as r|c 

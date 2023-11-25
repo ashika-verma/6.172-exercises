@@ -1,6 +1,5 @@
 #include <iostream>
 #include <chrono>
-#include <bitset>
 #include <stack>
 using namespace std;
 
@@ -38,9 +37,8 @@ struct boardDesc
     int emptyBoxes[empty_size]; // encoded [r_1|c_1, r_2|c_2]
 };
 
-boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
+int getEmptyBoxes(const int (&puzzle)[size][size], int (&emptyBoxes)[empty_size])
 {
-    struct boardDesc board;
     int counter = 0;
     for (int i = 0; i < size; i++)
     {
@@ -48,13 +46,12 @@ boardDesc getEmptyBoxes(const int (&puzzle)[size][size])
         {
             if (puzzle[i][j] == 0)
             {
-                board.emptyBoxes[counter] = i << 4 | j;
+                emptyBoxes[counter] = i << 4 | j;
                 counter += 1;
             }
         }
     }
-    board.boardSize = counter;
-    return board;
+    return counter;
 }
 
 bool solve_board(int (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const int curr_loc)
@@ -69,14 +66,12 @@ bool solve_board(int (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const
     int c = emptyBoxes[curr_loc] & 0b00001111;
 
     int valid = 0b1111111111;
-    // try the col
     for (int x = 0; x < size; x++)
     {
         int row_num = puzzle[x][c];
         int col_num = puzzle[r][x];
         // "clear bit"
-        valid = valid & ~(1 << row_num);
-        valid = valid & ~(1 << col_num);
+        valid &= ~((1 << row_num) | (1 << col_num));
     }
 
     int first_r = rowCheck[2 * r];
@@ -84,14 +79,11 @@ bool solve_board(int (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const
     int first_c = rowCheck[2 * c];
     int second_c = rowCheck[2 * c + 1];
 
-    int box_num = puzzle[first_r][first_c];
-    valid &= ~(1 << box_num);
-    box_num = puzzle[second_r][first_c];
-    valid &= ~(1 << box_num);
-    box_num = puzzle[first_r][second_c];
-    valid &= ~(1 << box_num);
-    box_num = puzzle[second_r][second_c];
-    valid &= ~(1 << box_num);
+    int bn1 = puzzle[first_r][first_c];
+    int bn2 = puzzle[second_r][first_c];
+    int bn3 = puzzle[first_r][second_c];
+    int bn4 = puzzle[second_r][second_c];
+    valid &= ~((1 << bn1) | (1 << bn2) | (1 << bn3) | (1 << bn4));
 
     for (int i = 1; i < 10; i++)
     {
@@ -117,17 +109,19 @@ int main()
     printSudokuBoard();
 
     auto start = chrono::high_resolution_clock::now();
-    boardDesc board = getEmptyBoxes(sudoku_board);
-    // solve_board(sudoku_board, board, 0);
-    solve_board(sudoku_board, board.emptyBoxes, board.boardSize - 1);
+
+    int emptyBoxes[empty_size];
+    int boardSize = getEmptyBoxes(sudoku_board, emptyBoxes);
+    solve_board(sudoku_board, emptyBoxes, boardSize - 1);
+
     auto end = chrono::high_resolution_clock::now();
 
     std::cout
         << "\nSolved Sudoku Board:\n";
     printSudokuBoard();
 
-    auto duration = chrono::duration_cast<chrono::microseconds>(end - start).count();
-    cout << "Time taken:  " << duration / 1000.0 << "ms" << endl;
+    auto duration = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+    cout << "Time taken:  " << duration / 1000.0 << " micros" << endl;
 
     return 0;
 }

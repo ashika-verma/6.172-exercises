@@ -7,7 +7,7 @@ constexpr int size = 9;
 
 constexpr int rowCheck[size * 2] = {1, 2, 0, 2, 0, 1, 4, 5, 3, 5, 3, 4, 7, 8, 6, 8, 6, 7};
 
-int sudoku_board[size][size] = {
+char sudoku_board[size][size] = {
     {5, 3, 0, 0, 7, 0, 0, 0, 0},
     {6, 0, 0, 1, 9, 5, 0, 0, 0},
     {0, 9, 8, 0, 0, 0, 0, 6, 0},
@@ -24,7 +24,7 @@ void printSudokuBoard()
     {
         for (int j = 0; j < size; ++j)
         {
-            std::cout << sudoku_board[i][j] << " ";
+            std::cout << sudoku_board[i][j] + 0 << " ";
         }
         std::cout << "\n";
     }
@@ -37,7 +37,7 @@ struct boardDesc
     int emptyBoxes[empty_size]; // encoded [r_1|c_1, r_2|c_2]
 };
 
-int getEmptyBoxes(const int (&puzzle)[size][size], int (&emptyBoxes)[empty_size])
+int getEmptyBoxes(const char (&puzzle)[size][size], int (&emptyBoxes)[empty_size])
 {
     int counter = 0;
     for (int i = 0; i < size; i++)
@@ -54,7 +54,7 @@ int getEmptyBoxes(const int (&puzzle)[size][size], int (&emptyBoxes)[empty_size]
     return counter;
 }
 
-bool solve_board(int (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const int curr_loc)
+bool solve_board(char (&puzzle)[size][size], int (&emptyBoxes)[empty_size], const int curr_loc)
 {
 
     if (curr_loc == -1)

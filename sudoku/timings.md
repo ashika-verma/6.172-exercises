@@ -13,3 +13,4 @@
 - use lookup table for box indices - .436ms
 - encode rowCheck as int[] instead of int[][], encode empty boxes as r|c - .418ms
 - don't pass the board object around LOL - 0.099ms (aka 99us)
+- flip int board to char board: 93micros
